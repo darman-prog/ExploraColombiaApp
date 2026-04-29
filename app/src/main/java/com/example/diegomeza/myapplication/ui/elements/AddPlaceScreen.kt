@@ -31,7 +31,6 @@ fun AddPlaceScreen(
     var department by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-
     val primaryOrange = Color(0xFFE45D25)
     val lightGrayBg = Color(0xFFF8F9FE)
     val inputBg = Color(0xFFE5E5EA)
