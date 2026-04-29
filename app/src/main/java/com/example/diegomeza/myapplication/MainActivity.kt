@@ -9,6 +9,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.diegomeza.myapplication.ui.elements.AddPlaceScreen
+import com.example.diegomeza.myapplication.ui.elements.HomeScreen
+import com.example.diegomeza.myapplication.ui.elements.LoginScreen
+import com.example.diegomeza.myapplication.ui.elements.RegisterScreen
 import com.google.firebase.auth.auth
 
 class MainActivity : ComponentActivity() {
@@ -16,9 +20,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val myNavController = rememberNavController()
             val auth = com.google.firebase.Firebase.auth
             val startRoute = if (auth.currentUser != null) "home" else "login"
+            val myNavController = rememberNavController()
 
             NavHost(
                 navController = myNavController,
@@ -53,15 +57,17 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
-                composable(route = "home") {    HomeScreen(
-                    onLogout = {
-                        myNavController.navigate("login") {
-                            popUpTo("home") { inclusive = true }
-                        }
-                    }
-                )
 
+                composable(route = "home") {
+                    HomeScreen(OnClickAddPlace = {
+                        myNavController.navigate("add_place")
+                    })
                 }
+
+                composable (route="add_place"){
+                    AddPlaceScreen()
+                }
+
             }
         }
     }

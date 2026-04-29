@@ -1,4 +1,4 @@
-package com.example.diegomeza.myapplication
+package com.example.diegomeza.myapplication.ui.elements
 import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,21 +21,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diegomeza.myapplication.ui.theme.ExploraColombiaAppTheme
+import com.example.diegomeza.myapplication.validarContraseña
+import com.example.diegomeza.myapplication.validarEmail
+import com.example.diegomeza.myapplication.validarNombre
+import com.example.diegomeza.myapplication.validarPassword
 import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.auth
 
 
@@ -60,7 +65,6 @@ fun RegisterScreen(
     //auth
     val auth = Firebase.auth
     val activity = LocalView.current.context as Activity
-
 
     //estados error
     var nameError by remember { mutableStateOf("") }
@@ -215,33 +219,40 @@ fun RegisterScreen(
             }
             Button(
                 onClick = {
-                    val isValidName = validarNombre(name).first
-                    val isValidEmail = validarEmail(email).first
-                    val isValidPassword = validarPassword(password).first
-                    val isValidConfirmPassword = validarContraseña(password, confirmPassword).first
+                    val nameRes = validarNombre(name)
+                    val emailRes = validarEmail(email)
+                    val passRes = validarPassword(password)
+                    val confirmRes = `validarContraseña`(password, confirmPassword)
 
-                    nameError = validarNombre(name).second
-                    emailError = validarEmail(email).second
-                    passwordError = validarPassword(password).second
-                    confirmPasswordError = validarContraseña(password, confirmPassword).second
-                    if(isValidName && isValidEmail && isValidPassword && isValidConfirmPassword){
-                        auth.createUserWithEmailAndPassword(email,password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    onRegisterSuccess()
-                                }else{
-                                    registerError = when(task.isSuccessful){
-                                        is FirebaseAuthInvalidCredentialsException -> "Correo o contraseña incorrecta"
-                                        is FirebaseAuthInvalidUserException -> "No existe una cuenta con este correo"
-                                        else -> "Error al registrarse"
+                    nameError = nameRes.second
+                    emailError = emailRes.second
+                    passwordError = passRes.second
+                    confirmPasswordError = confirmRes.second
+
+                    if (nameRes.first && emailRes.first && passRes.first && confirmRes.first) {
+                        if (acceptedTerms) {
+                            registerError = ""
+                            auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener(activity) { task ->
+                                    if (task.isSuccessful) {
+                                        onRegisterSuccess()
+                                    } else {
+                                        registerError = when (task.exception) {
+                                            is FirebaseAuthUserCollisionException ->
+                                                "Este correo ya está registrado"
+                                            is FirebaseAuthWeakPasswordException ->
+                                                "La contraseña es muy débil"
+                                            else -> "Error: ${task.exception?.localizedMessage}"
+                                        }
                                     }
                                 }
-                            }
-                    }else{
-                        registerError = "hubo un error en el registro "
+                        } else {
+                            registerError = "Debes aceptar los términos y condiciones"
                         }
-
-                    onRegisterSuccess() },
+                    } else {
+                        registerError = "Por favor, corrige los errores en el formulario"
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp),
@@ -323,7 +334,7 @@ fun RegisterField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    leadingIcon: ImageVector,
     inputBg: Color,
     modifier: Modifier = Modifier,
     isPassword: Boolean = false,
@@ -346,7 +357,7 @@ fun RegisterField(
                     Text(text = errorText, color = Color.Red)
                 }
             },
-            visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Text),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = inputBg,

@@ -1,4 +1,4 @@
-package com.example.diegomeza.myapplication
+package com.example.diegomeza.myapplication.ui.elements
 import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,8 +27,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diegomeza.myapplication.ui.theme.ExploraColombiaAppTheme
+import com.example.diegomeza.myapplication.validarEmail
+import com.example.diegomeza.myapplication.validarPassword
 import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.auth
@@ -176,7 +178,7 @@ fun LoginScreen(
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = primaryOrange,
-                        modifier = Modifier.clickable { /* Handle forgot password */ }
+                        modifier = Modifier.clickable { }
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -321,7 +323,7 @@ fun LoginScreen(
 }
 
 @Composable
-fun SocialButton(text: String, modifier: Modifier = Modifier, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+fun SocialButton(text: String, modifier: Modifier = Modifier, icon: ImageVector) {
     OutlinedButton(
         onClick = { /* Handle social login */ },
         modifier = modifier.height(50.dp),
