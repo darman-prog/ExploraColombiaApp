@@ -62,15 +62,18 @@ class MainActivity : ComponentActivity() {
                     HomeScreen(OnClickAddPlace = {
                         myNavController.navigate("add_place")
                     })
+
                 }
 
                 composable (route="add_place"){
-                    AddPlaceScreen()
+                    AddPlaceScreen(onBackClick = {
+                        myNavController.navigate("home") {
+                            popUpTo("home") { inclusive = true }
+                        }
+                    })
                 }
 
             }
         }
     }
 }
-
-
